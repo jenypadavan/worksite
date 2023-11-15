@@ -1,188 +1,202 @@
 <?php
+
 namespace App\Http\Controllers;
-use GuzzleHttp\Promise\RejectionException;
-use Illuminate\Support\Facades\Storage;
+
+use App\Events\SaveCartridgeHistory;
+use App\Models\CartridgeHistory;
+use Exception;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Cartrige;
 use App\Models\Printmodel;
 use App\Models\Cartstorage;
 use App\Models\Otdel;
 use Throwable;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Arr;
-#use Barryvdh\DomPDF\Facade\Pdf;
-use PDF;
-use App;
-#use Dompdf\Dompdf;
+
 class CartStorageController extends Controller
 {
 
-public $repository;
-public function __construct(Cartstorage $cartmodel){ $this->repository=$cartmodel;}
-
-    public function cartstorage_mp(){
-
-        return view('cartstoragemp');
-    }
-    
-
-    public function regCart(){
-	$cartReestr = Cartrige::orderBy('name')->get();
-	$techReestr = Printmodel::orderBy('name')->get();
-        return view('addcartmod', ['cartReestr'=>$cartReestr, 'techReestr'=>$techReestr]);
-	
+    /**
+     * @return Application|Factory|View
+     */
+    public function index()
+    {
+        return view('cartridges.index');
     }
 
-    public function onFill(){
-	$listOnFill = Cartstorage::where('act',1)->get();
-//	$tab = view('onfill', ['listOnFill'=>$listOnFill]);
-//	$pdf = PDF::loadView('onfill', compact($tab));
-	return view('onfill', ['listOnFill'=>$listOnFill]);
-	// $pdf = PDF::loadView('onfill', compact('listOnFill'));
-//	    $pdf = PDF::loadView('pdf');
-//	return response()->json($data);
-//	dd($pdf);
-//        return $pdf->download('act.pdf');
-	//return $pdf->stream();
-/*
-$dompdf = new Dompdf();
-$dompdf->loadHtml('hello world');
-$dompdf->setPaper('A4', 'landscape');
-$options = $dompdf->getOptions();
-$options->setDefaultFont('Courier');
-$dompdf->setOptions($options);
-$dompdf->render();
-$dompdf->stream();	
-*/
-}
+    /**
+     * @return Application|Factory|View
+     */
+    public function show($storage = null)
+    {
+        switch ($storage) {
+            case 'storage':
+                return view('cartridges.give-form');
+            case 'fill':
+                return view('cartridges.fill-form');
+            case 'work':
+                $departments = Otdel::orderBy('otd_name')->get();
 
-    public function clearAct(){
-	$listAct = Cartstorage::where('act',1)->get();
-	foreach ($listAct as $one){
-	    $one->act=0;
-	    $one->disloc="склад";
-	    $one->save();
-	}
-    }
+                return view('cartridges.form-work', compact('departments'));
+            case 'kill':
+                return view('cartridges.kill-form');
+            default:
+                $cartridgeBrands = Cartrige::orderBy('name')->get();
+                $printerModels = Printmodel::orderBy('name')->get();
 
-
-    public function onStorage(){
-	$listOnFill = Cartstorage::where('disloc','Склад')->get();
-        return view('onfill', ['listOnFill'=>$listOnFill]);
-	
-    }
-/*
-    public function onSumm(){
-	$reestr = Cartrige::all();
-	foreach ($reestr as $cart){
-	$summ = Cartstorage::where('id_name',$cart->id)->count();
-	$list = Arr:add($cart->printName->name => $summ);
-	}
-        return view('onfill', ['list'=>$list]);
-	
-    }
-*/
-
-    public function getCart(){
-        return view('givecartmod');
-	
-    }
-
-    public function fillCart(){
-        return view('fillcartmod');
-	
-    }
-
-    public function workCart(){
-	$otdReestr = Otdel::orderBy('otd_name')->get();
-        return view('workcartmod', ['otdReestr'=>$otdReestr]);
-	
-    }
-
-    public function killCart(){
-        return view('killcart');
-	
-    }
-
-    public function regNewCart(Request $req){
-	
-try{    
-    
-    if($req->proc == 'registration'){
-        $newCart = Cartstorage::where('sh_code', $req->sh_code)->first();
-       if($newCart){
-	  return "existscart";
+                return view('cartridges.form', compact('cartridgeBrands', 'printerModels'));
         }
-	$newCart = new Cartstorage();
-	$newCart->id_name = $req->id_name;
-	$newCart->id_mod = $req->id_print;
-	$newCart->sh_code = $req->sh_code;
-	$newCart->status = 1;
-	$newCart->disloc = "Склад";
-	$newCart->cin = 0;
-	$newCart->save();
-      
-    }
-}catch(Throwable $e){
 
-    return response()->json([
-          'error' => [
-          'code' => $e->getCode(),
-          'message' => $e->getMessage(),
-          ]
-        ], 400);
-}
 
-    if($req->proc == 'give'){
-    $newCart = Cartstorage::where('sh_code', $req->sh_code)->first();
-    if(!$newCart){
-	return "nullcart";
-    }
-    if($newCart->disloc=="Склад"){
-	return "errstor";	
-     }else{
-	$newCart->disloc = "Cклад";
-	$newCart->save();
-	}
     }
 
-    if($req->proc == 'fill'){
-   $newCart = Cartstorage::where('sh_code', $req->sh_code)->first();
-        if(!$newCart){
-	return "nullcart";
-    }
-    if($newCart->disloc=="на заправке"){
-	return "errfill";	
-     }else{
+    /**
+     * @return Application|Factory|View
+     */
+    public function act()
+    {
+        $cartridges = Cartstorage::where('act', 1)->get();
 
-	$newCart->disloc = "на заправке";
-	$newCart->cin += 1;
-	$newCart->act=1;
-	$newCart->save();
-     }
+        return view('cartridges.act', compact('cartridges'));
+
     }
 
-    if($req->proc == 'work'){
-	$newCart = Cartstorage::where('sh_code', $req->sh_code)->first();
-    if(!$newCart){
-	return "nullcart";
-    }
-	$newCart->disloc = $req->otd;
-	$newCart->save();
-    }
+    /**
+     * @return void
+     */
+    public function clearAct()
+    {
+        $cartridges = Cartstorage::where('act', 1)->get();
 
-    if($req->proc == 'kill'){
-	$newCart = Cartstorage::where('sh_code', $req->sh_code)->first();
-	    if(!$newCart){
-	return "nullcart";
-    }
-	$newCart->status = 0;
-	$newCart->disloc = "rip";
-	$newCart->save();
+        foreach ($cartridges as $cartridge) {
+            $cartridge->act = 0;
+            $cartridge->disloc = Cartstorage::DISLOCATION_STORAGE;
+            $cartridge->save();
+        }
     }
 
+    /**
+     * @return Application|Factory|View
+     */
+    public function onStorage()
+    {
+        $cartridges = Cartstorage::where('disloc', 'Склад')->get();
 
-}
+        return view('cartridges.act', compact('cartridges'));
+
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|void
+     * @throws Exception
+     */
+    public function save(Request $request)
+    {
+
+        $action = $request->get('action', 'registration');
+        $shCode = $request->get('sh_code') ?? null;
+
+        if (!$action)
+            throw new Exception('no-action');
+
+        $cartridge = Cartstorage::where('sh_code', $shCode)->first();
+
+        $statusFrom = null;
+
+        try {
+
+            switch ($action) {
+                case 'registration':
+
+                    if ($cartridge)
+                        throw new Exception('error-cartridge-exists');
+
+                    $cartridge = new Cartstorage();
+                    $cartridge->id_name = $request->get('id_name');
+                    $cartridge->id_mod = $request->get('id_print');
+                    $cartridge->sh_code = $shCode;
+                    $cartridge->status = Cartstorage::STATUS_STORAGE;
+                    $cartridge->disloc = Cartstorage::DISLOCATION_STORAGE;
+                    $cartridge->cin = 0;
+
+                    $cartridge->save();
 
 
+                    break;
+                case 'give':
+
+                    if (!$cartridge)
+                        throw new Exception('error-null-cartridge');
+
+                    $statusFrom = $cartridge->disloc;
+
+                    if ($cartridge->disloc == Cartstorage::DISLOCATION_STORAGE)
+                        throw new Exception('error-dislocate-to-storage');
+
+                    $cartridge->disloc = Cartstorage::DISLOCATION_STORAGE;
+                    $cartridge->save();
+
+                    break;
+                case 'fill':
+
+                    if (!$cartridge)
+                        throw new Exception('error-null-cartridge');
+
+                    $statusFrom = $cartridge->disloc;
+
+                    if ($cartridge->disloc == Cartstorage::DISLOCATION_FILL)
+                        throw new Exception('error-dislocate-to-fill');
+
+                    $cartridge->disloc = Cartstorage::DISLOCATION_FILL;
+                    $cartridge->cin += 1;
+                    $cartridge->act = 1;
+                    $cartridge->save();
+
+                    break;
+                case 'work':
+
+                    if (!$cartridge)
+                        throw new Exception('error-null-cartridge');
+
+                    $statusFrom = $cartridge->disloc;
+
+                    $cartridge->disloc = $request->get('otd');
+                    $cartridge->save();
+                    break;
+                case 'kill':
+
+                    if (!$cartridge)
+                        throw new Exception('error-null-cartridge');
+
+                    $statusFrom = $cartridge->disloc;
+
+                    $cartridge->status = Cartstorage::STATUS_KILLED;
+                    $cartridge->disloc = Cartstorage::DISLOCATION_RIP;
+                    $cartridge->save();
+                    break;
+
+            }
+
+            event(new SaveCartridgeHistory($cartridge, $statusFrom));
+
+        } catch (Throwable $e) {
+            return response()->json([
+                'error' => [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ]
+            ], 400);
+        }
+
+    }
+
+    public function history()
+    {
+        $history = CartridgeHistory::all();
+        return view('cartridges.history', compact('history'));
+    }
 }
