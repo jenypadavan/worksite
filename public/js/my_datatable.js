@@ -1,7 +1,9 @@
 $(document).ready(function () {
     let start = null
     let end = null
-    let picker = $('input[name="dates"]').daterangepicker({
+    let picker = $('input[name="dates"]')
+
+    picker.daterangepicker({
         startDate: moment().startOf('month'),
         endDate: moment().endOf('month'),
         locale: {
@@ -19,7 +21,7 @@ $(document).ready(function () {
         }
     });
 
-    $('input[name="dates"]').on('apply.daterangepicker', function (ev, picker) {
+    picker.on('apply.daterangepicker', function (ev, picker) {
         start = picker.startDate.format('YYYY-MM-DD')
         end = picker.endDate.format('YYYY-MM-DD')
         table.ajax.reload()
@@ -29,6 +31,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         searching: false,
+        stateSave: true,
         "ajax": {
             url: '/cartridge/history/get',
             data: function (d) {
@@ -76,20 +79,20 @@ $(document).ready(function () {
             [10, 50, 100, 200, "Все"]],
         iDisplayLength: 10
     });
-console.log(picker)
+
     $('.download-xlsx').on('click', function () {
         $.ajax({
             xhrFields: {
                 responseType: 'blob',
             },
-            type:'POST',
-            url:'/cartridge/download',
-            data:{
+            type: 'POST',
+            url: '/cartridge/download',
+            data: {
                 'startDate': start,
                 'endDate': end
             },
-            success:function (data){
-                const url = window.URL.createObjectURL(new Blob([data],{
+            success: function (data) {
+                const url = window.URL.createObjectURL(new Blob([data], {
                     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 }));
                 const link = document.createElement('a');
