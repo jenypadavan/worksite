@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\SaveCartridgeHistory;
+use App\Exports\StatisticsExports;
 use App\Models\CartridgeHistory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -14,6 +16,7 @@ use App\Models\Cartrige;
 use App\Models\Printmodel;
 use App\Models\Cartstorage;
 use App\Models\Otdel;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CartStorageController extends Controller
@@ -196,7 +199,103 @@ class CartStorageController extends Controller
 
     public function history()
     {
-        $history = CartridgeHistory::all();
-        return view('cartridges.history', compact('history'));
+        return view('cartridges.history');
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getHistory(Request $request): JsonResponse
+    {
+
+        $order = $request->get('order');
+        $columns = $request->get('columns');
+        $startDate = $request->get('startDate') ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->get('endDate') ?? Carbon::now()->endOfMonth()->format('Y-m-d');
+        $length = $request->get('length', 10);
+        $startRecord = $request->get('start', 0);
+
+        $orderColumn = 'created_at';
+        $orderDir = 'desc';
+
+        if ($order) {
+            $orderColumn = $columns[$order[0]['column']]['name'];
+            $orderDir = $order[0]['dir'];
+        }
+
+        $history = CartridgeHistory::query()->select('cartridge_id');
+
+        switch ($orderColumn) {
+            case 'cartridge_id':
+                $history = $history
+                    ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
+                    ->leftJoin('cartriges', 'cartstorages.id_name', '=', 'cartriges.id')
+                    ->leftJoin('printmodels', 'cartstorages.id_mod', '=', 'printmodels.id')
+                    ->orderBy('cartriges.name', $orderDir)
+                    ->orderBy('printmodels.name', $orderDir);
+                break;
+            case  'sh_code':
+                $history = $history
+                    ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
+                    ->orderBy('cartstorages.sh_code', $orderDir);
+                break;
+            case 'on_fill':
+                $history = $history->select(['cartridge_id', DB::raw("COUNT(if(status_from='на заправке',1,null)) AS cnt")])
+                    ->orderBy('cnt', $orderDir);
+                break;
+            case 'from_fill':
+                $history = $history->select(['cartridge_id', DB::raw("COUNT(if(status_to='на заправке',1,null)) AS cnt")])
+                    ->orderBy('cnt', $orderDir);
+                break;
+            case 'to_department':
+                $history = $history
+                    ->select(['cartridge_id', DB::raw('COUNT(if(status_from<>"на заправке" and status_from<>"Склад" and status_from is not NULL and status_from<>"rip",1,null)) as cnt')])
+                    ->orderBy('cnt', $orderDir);
+                break;
+            case 'from_department':
+                $history = $history
+                    ->select(['cartridge_id', DB::raw('COUNT(if(status_to<>"на заправке" and status_to<>"Склад" and status_to<>"rip",1,null)) as cnt')])
+                    ->orderBy('cnt', $orderDir);
+                break;
+            default:
+                $history = $history->orderBy($orderColumn, $orderDir);
+                break;
+        }
+
+        $history = $history->groupBy('cartridge_history.cartridge_id');
+
+        $totalRecords = $history->get()->count();
+
+        $history = $history->where('cartridge_history.created_at', '>=', Carbon::parse($startDate . ' 00:00:00'))->where('cartridge_history.created_at', '<=', Carbon::parse($endDate . ' 23:59:59'));
+
+        $filteredRecords = $history->get()->count();
+
+        $history = $history->offset($startRecord)->limit($length)->get();
+
+        $data = [];
+        foreach ($history as $hs) {
+            $data[] = [
+                'sh_code' => $hs->cartridge->sh_code,
+                'cartridge_id' => $hs->cartridge->cartName->name . " " . $hs->cartridge->printName->name,
+                'on_fill' => $hs->getOnFill($startDate, $endDate),
+                'from_fill' => $hs->getFromFill($startDate, $endDate),
+                'to_department' => $hs->getToDepartment($startDate, $endDate),
+                'from_department' => $hs->getFromDepartment($startDate, $endDate),
+                'on_storage' => $hs->onStorage($endDate),
+            ];
+        }
+
+        $res['recordsTotal'] = $totalRecords;
+        $res['recordsFiltered'] = $filteredRecords;
+        $res['data'] = $data;
+        return response()->json($res);
+    }
+
+    public function download(Request $request)
+    {
+
+        return (new StatisticsExports($request))->download("Statistics.xlsx");
+
     }
 }

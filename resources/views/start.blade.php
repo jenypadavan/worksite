@@ -28,6 +28,8 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/time.css') }}" rel="stylesheet">
     <link href="{{ asset('css/icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('js/datatable/datatables.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('js/daterangepicker/daterangepicker.css') }}" rel="stylesheet">
 
 
 </head>
@@ -148,18 +150,28 @@
 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
     @csrf
 </form>
-<script src="{{ asset('js/jquery-3.6.0.min.js')}}" type="text/javascript"></script>
+<script src="{{ asset('js/jquery-3.7.1.min.js')}}" type="text/javascript"></script>
 <script src="{{ asset('js/app.js')}}" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
         crossorigin="anonymous"></script>
+<script src="{{ asset('js/datatable/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main.js')}}" type="text/javascript"></script>
 <script src="{{ asset('js/myengine.js')}}" type="text/javascript"></script>
 <script src="{{ asset('js/findpc.js')}}" type="text/javascript"></script>
+<script src="{{ asset('js/datatable/dataTables.ru.js')}}" type="text/javascript"></script>
+<script src="{{ asset('js/daterangepicker/moment.min.js')}}" type="text/javascript"></script>
+<script src="{{ asset('js/daterangepicker/daterangepicker.js')}}" type="text/javascript"></script>
+<script src="{{ asset('js/my_datatable.js')}}" type="text/javascript"></script>
 
-<script type="text/javascript" src="./ckeditor/ckeditor.js"></script>
+
+<script type="text/javascript" src="{{asset('/ckeditor/ckeditor.js')}}"></script>
 <script type="text/javascript">
-    CKEDITOR.replace('editor1');
+    const editor = document.getElementById('editor1')
+    if (editor) {
+        CKEDITOR.replace('editor1');
+    }
+
 </script>
 
 </body>

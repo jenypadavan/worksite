@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function (){
         Route::post('/act/clear', [App\Http\Controllers\CartStorageController::class, 'clearAct']);
         Route::get('/on-storage', [App\Http\Controllers\CartStorageController::class, 'onStorage']);
         Route::get('/history', [App\Http\Controllers\CartStorageController::class, 'history']);
+        Route::get('/history/get', [App\Http\Controllers\CartStorageController::class, 'getHistory'])->name('history.get');
+        Route::post('/download', [App\Http\Controllers\CartStorageController::class, 'download']);
     });
 
     Route::get('/org', [App\Http\Controllers\OrgtechController::class, 'orgpanel']);
