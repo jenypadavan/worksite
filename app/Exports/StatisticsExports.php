@@ -29,9 +29,10 @@ class StatisticsExports implements FromQuery, WithMapping, WithHeadings
 
         return CartridgeHistory::query()
             ->select('cartridge_id')
-            ->where('created_at', '>=', Carbon::parse($this->startDate . ' 00:00:00'))
-            ->where('created_at', '<=', Carbon::parse($this->endDate . ' 23:59:59'))
-            ->groupBy('cartridge_id')
+            ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
+            ->where('cartridge_history.created_at', '>=', Carbon::parse($this->startDate . ' 00:00:00'))
+            ->where('cartridge_history.created_at', '<=', Carbon::parse($this->endDate . ' 23:59:59'))
+            ->groupBy('cartstorages.id_name')
             ->orderBy('cartridge_id');
     }
 
@@ -58,7 +59,7 @@ class StatisticsExports implements FromQuery, WithMapping, WithHeadings
             $row->getFromFill($this->startDate, $this->endDate),
             $row->getToDepartment($this->startDate, $this->endDate),
             $row->getFromDepartment($this->startDate, $this->endDate),
-            $row->onStorage($this->endDate),
+            $row->onStorage($row->cartridge->id_name, $this->endDate),
 
         ];
     }
