@@ -16,7 +16,6 @@ use App\Models\Cartrige;
 use App\Models\Printmodel;
 use App\Models\Cartstorage;
 use App\Models\Otdel;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CartStorageController extends Controller
