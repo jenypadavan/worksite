@@ -140,7 +140,7 @@ class CartStorageController extends Controller
 
         $this->order();
 
-        $this->query = $this->query->groupBy('cartridge_history.cartridge_id');
+        $this->query = $this->query->groupBy('cartstorages.id_name');
 
         $totalRecords = $this->query->get()->count();
 
@@ -154,13 +154,12 @@ class CartStorageController extends Controller
 
         foreach ($history as $hs) {
             $data[] = [
-                'sh_code' => $hs->cartridge->sh_code,
                 'cartridge_id' => $hs->cartridge->cartName->name . " " . $hs->cartridge->printName->name,
                 'on_fill' => $hs->getOnFill($startDate, $endDate),
                 'from_fill' => $hs->getFromFill($startDate, $endDate),
                 'to_department' => $hs->getToDepartment($startDate, $endDate),
                 'from_department' => $hs->getFromDepartment($startDate, $endDate),
-                'on_storage' => $hs->onStorage($endDate),
+                'on_storage' => $hs->onStorage($hs->cartridge->id_name, $endDate),
             ];
         }
 
@@ -287,11 +286,6 @@ class CartStorageController extends Controller
                     ->leftJoin('printmodels', 'cartstorages.id_mod', '=', 'printmodels.id')
                     ->orderBy('cartriges.name', $orderDir)
                     ->orderBy('printmodels.name', $orderDir);
-                break;
-            case  'sh_code':
-                $this->query = $this->query
-                    ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
-                    ->orderBy('cartstorages.sh_code', $orderDir);
                 break;
             case 'on_fill':
                 $this->query = $this->query

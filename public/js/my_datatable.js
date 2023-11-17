@@ -31,7 +31,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         searching: false,
-        stateSave: true,
+      //  stateSave: true,
         "ajax": {
             url: '/cartridge/history/get',
             data: function (d) {
@@ -44,10 +44,6 @@ $(document).ready(function () {
         "language": mJson,
         "order": [[0, "desc"]],
         columns: [
-            {
-                data: 'sh_code',
-                name: 'sh_code'
-            },
             {
                 data: 'cartridge_id',
                 name: 'cartridge_id'
@@ -73,7 +69,7 @@ $(document).ready(function () {
                 name: 'on_storage',
             },
         ],
-        columnDefs: [{'orderable': false, targets: [6]}],
+        columnDefs: [{'orderable': false, targets: [5]}],
         aLengthMenu: [
             [10, 50, 100, 200, -1],
             [10, 50, 100, 200, "Все"]],

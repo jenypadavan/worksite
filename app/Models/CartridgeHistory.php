@@ -74,8 +74,8 @@ class CartridgeHistory extends Model
         return $query->count();
     }
 
-    public function onStorage($endDate)
+    public function onStorage($id_name,$endDate)
     {
-        return 1;
+        return Cartstorage::where('updated_at','<=',$endDate)->where(['id_name'=>$id_name])->count();
     }
 }
