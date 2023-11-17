@@ -29,9 +29,8 @@ class StatisticsExports implements FromQuery, WithMapping, WithHeadings
 
         return CartridgeHistory::query()
             ->select('cartridge_id')
-            ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
-            ->where('cartridge_history.created_at', '>=', Carbon::parse($this->startDate . ' 00:00:00'))
-            ->where('cartridge_history.created_at', '<=', Carbon::parse($this->endDate . ' 23:59:59'))
+            ->addCartStorage()
+            ->range($this->startDate, $this->endDate)
             ->groupBy('cartstorages.id_name')
             ->orderBy('cartridge_id');
     }

@@ -144,7 +144,7 @@ class CartStorageController extends Controller
 
         $totalRecords = $this->query->get()->count();
 
-        $this->query = $this->query->where('cartridge_history.created_at', '>=', Carbon::parse($startDate . ' 00:00:00'))->where('cartridge_history.created_at', '<=', Carbon::parse($endDate . ' 23:59:59'));
+        $this->query = $this->query->range($startDate, $endDate);
 
         $filteredRecords = $this->query->get()->count();
 
@@ -278,37 +278,25 @@ class CartStorageController extends Controller
             $orderColumn = $this->columns[$this->order[0]['column']]['name'];
             $orderDir = $this->order[0]['dir'];
         }
+
         switch ($orderColumn) {
             case 'cartridge_id':
-                $this->query = $this->query
-                    ->leftJoin('cartstorages', 'cartstorages.id', '=', 'cartridge_history.cartridge_id')
-                    ->leftJoin('cartriges', 'cartstorages.id_name', '=', 'cartriges.id')
-                    ->leftJoin('printmodels', 'cartstorages.id_mod', '=', 'printmodels.id')
-                    ->orderBy('cartriges.name', $orderDir)
-                    ->orderBy('printmodels.name', $orderDir);
+                $this->query->withOrderByName($orderDir);
                 break;
             case 'on_fill':
-                $this->query = $this->query
-                    ->select(['cartridge_id', DB::raw("COUNT(if(status_from='на заправке',1,null)) AS cnt")])
-                    ->orderBy('cnt', $orderDir);
+                $this->query->withOrderByOnFill($orderDir);
                 break;
             case 'from_fill':
-                $this->query = $this->query
-                    ->select(['cartridge_id', DB::raw("COUNT(if(status_to='на заправке',1,null)) AS cnt")])
-                    ->orderBy('cnt', $orderDir);
+                $this->query->withOrderByFromFill($orderDir);
                 break;
             case 'to_department':
-                $this->query = $this->query
-                    ->select(['cartridge_id', DB::raw('COUNT(if(status_from<>"на заправке" and status_from<>"Склад" and status_from is not NULL and status_from<>"rip",1,null)) as cnt')])
-                    ->orderBy('cnt', $orderDir);
+                $this->query->withOrderByToDepartment($orderDir);
                 break;
             case 'from_department':
-                $this->query = $this->query
-                    ->select(['cartridge_id', DB::raw('COUNT(if(status_to<>"на заправке" and status_to<>"Склад" and status_to<>"rip",1,null)) as cnt')])
-                    ->orderBy('cnt', $orderDir);
+                $this->query->withOrderByFromDepartment($orderDir);
                 break;
             default:
-                $this->query = $this->query->orderBy($orderColumn, $orderDir);
+                $this->query->orderBy($orderColumn, $orderDir);
                 break;
         }
     }
