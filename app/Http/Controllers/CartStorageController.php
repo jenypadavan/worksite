@@ -74,6 +74,7 @@ class CartStorageController extends Controller
      */
     public function clearAct()
     {
+
         $cartridges = Cartstorage::where('act', 1)->get();
 
         foreach ($cartridges as $cartridge) {
@@ -81,6 +82,7 @@ class CartStorageController extends Controller
             $cartridge->disloc = Cartstorage::DISLOCATION_STORAGE;
             $cartridge->save();
         }
+
     }
 
     /**

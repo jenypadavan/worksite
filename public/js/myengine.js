@@ -634,7 +634,7 @@ $("#clact").on('click', function () {
     if (clear) {
         $.ajax({
             type: 'POST',
-            url: '/act/clear',
+            url: '/cartridge/act/clear',
             success: function () {
                 alert('OK');
             }
