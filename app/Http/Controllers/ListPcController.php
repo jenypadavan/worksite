@@ -4,15 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\FreeIp;
 use App\Models\ListPc;
-use App\Models\MisDoc;
 use App\Validators\PcValidator;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 
 class ListPcController extends Controller
@@ -55,10 +52,12 @@ class ListPcController extends Controller
 
     }
 
+    /**
+     * @return Application|Factory|View
+     */
     public function ffip()
     {
 
-        //  $list36=FreeIp::with(['findfreeip'])->whereNull('listPc.ip')->where('freeIp.ip', 'like', '10.174.36.%')->get();
         $list36 = FreeIp::query()->select('free_ips.*')->
         leftJoin('list_pcs', function ($join) {
             $join->on('free_ips.ip', '=', 'list_pcs.ip');
@@ -82,6 +81,10 @@ class ListPcController extends Controller
         return view('listfreeip', ['tab36' => $list36, 'tab37' => $list37, 'tab38' => $list38, 'tab39' => $list39]);
     }
 
+    /**
+     * @param Request $req
+     * @return void
+     */
     public function addfio(Request $req)
     {
         $id = $req->get('id');
@@ -91,6 +94,10 @@ class ListPcController extends Controller
         $model->save();
     }
 
+    /**
+     * @param $request
+     * @return array
+     */
     private function getValues($request)
     {
         $keys = ['inpnum' => 'inv', 'inpip' => 'ip', 'krp' => 'korp'];
