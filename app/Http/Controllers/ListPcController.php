@@ -41,12 +41,12 @@ class ListPcController extends Controller
         if ($validate->fails())
             throw new Exception('Неверные данные');
 
-        $value = $this->getValues($request);
+        $data = $this->getValues($request);
 
-        $res = ListPc::where($value['type'], $value['value'])->get();
+        $res = ListPc::where($data['field_name'], $data['value'])->get();
         $cin = $res->count();
 
-        if ($value == 'all') {
+        if ($data['value'] == 'all') {
             $res = ListPc::all();
             $cin = $res->count();
         }
@@ -98,7 +98,7 @@ class ListPcController extends Controller
 
         foreach ($keys as $key => $item) {
             if (!$value)
-                $value = $request->get($key) ? ['type' => $item, 'value' => $request->get($key)] : [];
+                $value = $request->get($key) ? ['field_name' => $item, 'value' => $request->get($key)] : [];
         }
 
         return $value;
