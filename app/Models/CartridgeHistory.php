@@ -38,7 +38,8 @@ class CartridgeHistory extends Model
 
     public function getOnFill($startDate, $endDate)
     {
-        $query = CartridgeHistory::where(['cartridge_id' => $this->cartridge_id, 'status_from' => Cartstorage::DISLOCATION_FILL]);
+        $query = CartridgeHistory::where(['status_from' => Cartstorage::DISLOCATION_FILL])
+	    ->whereIn('cartridge_id', Cartstorage::select('id')->where(['id_name'=>$this->cartridge->id_name]));
 
         if ($startDate && $endDate)
             $query = $query->where('created_at', '>=', Carbon::parse($startDate . ' 00:00:00'))->where('created_at', '<=', Carbon::parse($endDate . ' 23:59:59'));
@@ -50,7 +51,8 @@ class CartridgeHistory extends Model
     public function getFromFill($startDate, $endDate)
     {
 
-        $query = CartridgeHistory::where(['cartridge_id' => $this->cartridge_id, 'status_to' => Cartstorage::DISLOCATION_FILL]);
+        $query = CartridgeHistory::where(['status_to' => Cartstorage::DISLOCATION_FILL])
+	    ->whereIn('cartridge_id', Cartstorage::select('id')->where(['id_name'=>$this->cartridge->id_name]));
 
         if ($startDate && $endDate)
             $query = $query->where('created_at', '>=', Carbon::parse($startDate . ' 00:00:00'))->where('created_at', '<=', Carbon::parse($endDate . ' 23:59:59'));
@@ -60,7 +62,7 @@ class CartridgeHistory extends Model
 
     public function getToDepartment($startDate, $endDate)
     {
-        $query = CartridgeHistory::where(['cartridge_id' => $this->cartridge_id])
+        $query = CartridgeHistory::whereIn('cartridge_id', Cartstorage::select('id')->where(['id_name'=>$this->cartridge->id_name]))
             ->whereNotNull('status_from')
             ->where('status_from', '<>', Cartstorage::DISLOCATION_FILL)
             ->where('status_from', '<>', Cartstorage::DISLOCATION_STORAGE)
@@ -74,7 +76,7 @@ class CartridgeHistory extends Model
 
     public function getFromDepartment($startDate, $endDate)
     {
-        $query = CartridgeHistory::where(['cartridge_id' => $this->cartridge_id])
+        $query = CartridgeHistory::whereIn('cartridge_id', Cartstorage::select('id')->where(['id_name'=>$this->cartridge->id_name]))
             ->where('status_to', '<>', Cartstorage::DISLOCATION_FILL)
             ->where('status_to', '<>', Cartstorage::DISLOCATION_STORAGE)
             ->where('status_to', '<>', Cartstorage::DISLOCATION_RIP);

@@ -33,6 +33,7 @@ class ListPcController extends Controller
      */
     public function makepclist(Request $request)
     {
+	$krp=$request->get('krp');
         $validate = $this->validator->getPcNotEmptyValidator($request);
 
         if ($validate->fails())
@@ -42,10 +43,17 @@ class ListPcController extends Controller
 
         $res = ListPc::where($data['field_name'], $data['value'])->get();
         $cin = $res->count();
-
+/*
         if ($data['value'] == 'all') {
-            $res = ListPc::all();
+            $res = ListPc::all()->orderBy('etaj');
             $cin = $res->count();
+        }
+*/
+        if(!empty($krp)){
+            $res=ListPc::where('korp',$krp)->orderBy('etaj')->orderBy('pom')->get();
+            $cin=$res->count();
+            if($krp=='all') {$res=ListPc::all();$cin=$res->count();}
+            return view("pctable",['tab'=>$res, 'cin'=>$cin]);
         }
 
         return view("pctable", ['tab' => $res, 'cin' => $cin]);
