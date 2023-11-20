@@ -11,7 +11,6 @@
     <table class="table table-striped table-bordered" id="cartridge_history">
         <thead>
         <tr>
-            <th scope="col">Картридж</th>
             <th scope="col">Модель</th>
             <th scope="col">С заправки</th>
             <th scope="col">На заправку</th>
