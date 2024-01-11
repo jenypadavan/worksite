@@ -52,8 +52,9 @@ class StatisticsExports implements FromQuery, WithMapping, WithHeadings
     {
 
         return [
-            $row->cartridge->sh_code,
-            $row->cartridge->cartName->name . " " . $row->cartridge->printName->name,
+#            $row->cartridge->sh_code,
+            $row->cartridge->cartName->name, 
+	    $row->cartridge->printName->name,
             $row->getOnFill($this->startDate, $this->endDate),
             $row->getFromFill($this->startDate, $this->endDate),
             $row->getToDepartment($this->startDate, $this->endDate),

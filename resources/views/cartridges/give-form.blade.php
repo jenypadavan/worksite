@@ -9,4 +9,8 @@
             <p>Картридж возвращен на склад!</p>
         </div>
     </div>
+	<p>
+	    Резерв <input type="checkbox" id="chkres">
+	</p>
+
 </div>

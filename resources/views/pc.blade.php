@@ -48,6 +48,7 @@
                             <option value="Пищеблок">Пищеблок</option>
                             <option value="Патанатомия">Патанатомия</option>
                             <option value="Невроцентр">Невр. центр</option>
+                            <option value="Новый">Новый корпус</option>
                             <option value="all">Все</option>
                         </select>
                     </div>

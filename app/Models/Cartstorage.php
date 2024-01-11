@@ -27,6 +27,7 @@ class Cartstorage extends Model
     const DISLOCATION_STORAGE = "Склад";
     const DISLOCATION_FILL = "на заправке";
     const DISLOCATION_RIP = "rip";
+    const DISLOCATION_RES = "резерв";
 
     /**
      * @return HasOne

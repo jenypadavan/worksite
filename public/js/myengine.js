@@ -679,6 +679,13 @@ $("#mbody").keyup(function (event) {
         let sh_code = $("#sh_code").val();
         let action = $("#mod_context").data('modal');
         let otd = $("#sel_otd option:selected").text();
+    if ($('#chkres')){
+	let chk = document.querySelector('#chkres').checked;
+	alert(chk);
+	return 1;
+	}
+	alert('ok');
+	return 2;
         $.ajax({
             type: 'POST',
             url: '/cartridge',
@@ -726,7 +733,7 @@ function showAlert(error) {
 /*
 $(document).ready(function() {
       $("#modForm").keydown(function(event){
-	alert("yahooo");
+    alert("yahooo");
         if(event.keyCode === 13) {
           event.preventDefault();
           return false;
