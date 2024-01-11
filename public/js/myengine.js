@@ -679,13 +679,11 @@ $("#mbody").keyup(function (event) {
         let sh_code = $("#sh_code").val();
         let action = $("#mod_context").data('modal');
         let otd = $("#sel_otd option:selected").text();
-    if ($('#chkres')){
-	let chk = document.querySelector('#chkres').checked;
-	alert(chk);
-	return 1;
-	}
-	alert('ok');
-	return 2;
+        let chk = null
+        if (document.querySelector('#chkres')) {
+            chk = document.querySelector('#chkres').checked;
+        }
+
         $.ajax({
             type: 'POST',
             url: '/cartridge',
@@ -694,7 +692,8 @@ $("#mbody").keyup(function (event) {
                 id_print: id_print,
                 sh_code: sh_code,
                 action: action,
-                otd: otd
+                otd: otd,
+                chk: chk
             },
             success: function () {
                 let alert = $('.alert')

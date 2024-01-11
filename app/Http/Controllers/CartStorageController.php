@@ -213,20 +213,21 @@ class CartStorageController extends Controller
 
                 break;
             case 'give':
-		
+
                 if (!$cartridge)
                     throw new Exception('error-null-cartridge');
-//		echo $request->get('chk');
+
                 $statusFrom = $cartridge->disloc;
 
                 if ($cartridge->disloc == Cartstorage::DISLOCATION_STORAGE)
                     throw new Exception('error-dislocate-to-storage');
-		if ($request->get('chk')=="true"){
-        	    $cartridge->disloc = Cartstorage::DISLOCATION_RES;
-                    $cartridge->save();
-		    break;
-                }
+
                 $cartridge->disloc = Cartstorage::DISLOCATION_STORAGE;
+
+                if ($request->get('chk') == "true") {
+                    $cartridge->disloc = Cartstorage::DISLOCATION_RES;
+                }
+
                 $cartridge->save();
 
                 break;

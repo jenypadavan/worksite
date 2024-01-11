@@ -3,7 +3,7 @@
 
         <div class="row" style="margin-top: 5px;">
             Штрих-код&nbsp
-            <input type="text" id="sh_code" OnKeyUp=regCart()>
+            <input type="text" id="sh_code">
         </div>
 
         <div class="alert alert-success" role="alert" style="display:none">
